@@ -130,6 +130,7 @@ legend{font-size:14px;letter-spacing:.06em;color:var(--text-muted);margin-bottom
 .chk input{width:22px;height:22px;flex:none;margin:1px 0 0;accent-color:var(--pine)}
 .note{font-size:13px;line-height:1.5;color:var(--text-muted);margin:0}
 .err{color:#8A1C1C;font-size:14px;margin:0}
+.hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
 .shake{animation:shake 360ms var(--ease)}
 @keyframes shake{20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(3px)}}
 
@@ -308,6 +309,7 @@ th{font-weight:400;letter-spacing:.1em;text-transform:uppercase;color:var(--text
     <h2 class="hl hl-l" style="margin-top:64px" data-lines><span class="line"><span>Wir halten dir</span></span><span class="line" style="--i:1"><span>einen Platz <em>frei.</em></span></span></h2>
     <p class="sub" data-reveal>We'll save you a seat.</p>
     <form id="signup" novalidate data-reveal>
+      <label class="hp" aria-hidden="true">Website<input type="text" name="website" tabindex="-1" autocomplete="off"></label>
       <label class="f">Vorname · First name<input type="text" name="name" autocomplete="given-name" required></label>
       <label class="f">Wie erreichen wir dich? · Instagram, WhatsApp oder E-Mail<input type="text" name="contact" required placeholder="@name, +49 … oder mail@…"></label>
       <label class="f">Bezirk · District<select name="district" required></select></label>
@@ -335,7 +337,7 @@ th{font-weight:400;letter-spacing:.1em;text-transform:uppercase;color:var(--text
       <p>Ein entspannter Safe Space für Spaß, echte Gespräche, Glauben entdecken &amp; Fragen stellen.<span>A relaxed safe space for fun, real talk, discovering faith and asking questions.</span></p>
       <svg class="mark" role="img" aria-label="Christ Connect Logo" fill="#F4F2EA"><use href="#cc-mark"/></svg>
     </div>
-    <div class="legal"><a href="https://www.instagram.com/christ.connect.berlin/">Instagram</a><a href="[Impressum-Link]">Impressum</a><a href="[Datenschutz-Link]">Datenschutz</a><button type="button" data-open-team>Team · Demo</button></div>
+    <div class="legal"><a href="https://www.instagram.com/christ.connect.berlin/">Instagram</a><a href="[Impressum-Link]">Impressum</a><a href="[Datenschutz-Link]">Datenschutz</a></div>
   </div>
 </footer>
 </main>
@@ -368,19 +370,9 @@ th{font-weight:400;letter-spacing:.1em;text-transform:uppercase;color:var(--text
   </div>
 </div>
 
-<!-- team demo -->
-<div class="overlay t-chalk" id="team" role="dialog" aria-modal="true" aria-label="Team-Demo">
-  <div class="ov-in">
-    <div class="bar"><b>Anmeldungen · Demo</b><button class="close" data-close>Schließen</button></div>
-    <p class="note" style="margin-top:22px">Prototyp: Anmeldungen landen nur in diesem Browser. Live gehen sie direkt in das Team-Sheet (siehe <code>SUBMIT_URL</code>).</p>
-    <div id="team-list"></div>
-    <div class="links"><button class="btn" id="copy-csv"><span>Als CSV kopieren<small id="copy-msg">Für Google Sheets einfügen</small></span><svg class="ic"><use href="#i-link"/></svg></button></div>
-  </div>
-</div>
-
 <script>
 /* ================= CONFIG ================= */
-const SUBMIT_URL = ""; // live: Google Apps Script Web-App-URL
+const SUBMIT_URL = ""; // Google Apps Script Web-App-URL (endet auf /exec)
 const PAGE_URL = "https://christconnectberlin.github.io/"; // live: öffentlicher Link der Seite (z. B. GitHub Pages). Leer = aktuelle Adresse.
 
 /* Fotos: Dateinamen/URLs eintragen (z. B. "img/living-room.jpg"). Leer = markierter Platzhalter. */
@@ -703,29 +695,20 @@ function renderResult(){
 $("#signup").addEventListener("submit",async e=>{
   e.preventDefault();
   const fd=new FormData(e.target);
-  const entry={time:new Date().toISOString(),name:(fd.get("name")||"").trim(),contact:(fd.get("contact")||"").trim(),district:fd.get("district")||"",interests:fd.getAll("interest").join(", "),source:"Linkpage"};
+  const entry={time:new Date().toISOString(),name:(fd.get("name")||"").trim(),contact:(fd.get("contact")||"").trim(),district:fd.get("district")||"",interests:fd.getAll("interest").join(", "),source:"Linkpage",consent:!!fd.get("consent"),website:fd.get("website")||""};
   const miss=[];
   if(!entry.name)miss.push("Vorname"); if(!entry.contact)miss.push("Kontakt"); if(!entry.district)miss.push("Bezirk");
   if(!fd.get("age16"))miss.push("16+"); if(!fd.get("consent"))miss.push("Einverständnis");
   if(miss.length){$("#err").textContent="Bitte noch ausfüllen · Please complete: "+miss.join(", ");const b=e.target.querySelector("[type=submit]");b.classList.remove("shake");void b.offsetWidth;b.classList.add("shake");return;}
   $("#err").textContent="";
-  if(SUBMIT_URL){try{await fetch(SUBMIT_URL,{method:"POST",mode:"no-cors",body:JSON.stringify(entry)});}catch(err){}}
-  const list=store.get("cc_demo_inbox")||[]; list.push(entry); store.set("cc_demo_inbox",list);
+  const btn=e.target.querySelector("[type=submit]");btn.disabled=true;
+  try{ if(SUBMIT_URL) await fetch(SUBMIT_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(entry)}); }
+  catch(err){ btn.disabled=false; $("#err").textContent="Das hat nicht geklappt. Prüf deine Verbindung und versuch es nochmal. · Couldn't send, please try again."; return; }
+  btn.disabled=false;
   $("#thanks-txt").textContent=`Danke, ${entry.name}. Jemand aus dem Team ${entry.district==="Anderer Bezirk"?"":"in "+entry.district+" "}meldet sich in den nächsten Tagen bei dir (${entry.contact}). Thanks, someone from the team will reach out soon.`;
   e.target.reset(); buzz(); openOv("thanks");
 });
 
-/* ================= TEAM DEMO ================= */
-function renderTeam(){
-  const list=store.get("cc_demo_inbox")||[];
-  $("#team-list").innerHTML=list.length?`<table><thead><tr><th>Datum</th><th>Name</th><th>Kontakt</th><th>Bezirk</th><th>Interessen</th></tr></thead><tbody>${list.slice().reverse().map(r=>`<tr><td>${esc(r.time.slice(0,10))}</td><td>${esc(r.name)}</td><td>${esc(r.contact)}</td><td>${esc(r.district)}</td><td>${esc(r.interests)}</td></tr>`).join("")}</tbody></table>`:`<p style="margin-top:22px">Noch keine Anmeldungen. Füll das Formular einmal aus, um den Ablauf zu sehen.</p>`;
-}
-$$("[data-open-team]").forEach(b=>b.addEventListener("click",()=>{renderTeam();openOv("team")}));
-$("#copy-csv").addEventListener("click",async()=>{
-  const list=store.get("cc_demo_inbox")||[];
-  const csv=["Datum,Name,Kontakt,Bezirk,Interessen,Quelle"].concat(list.map(r=>[r.time,r.name,r.contact,r.district,r.interests,r.source].map(x=>'"'+String(x).replace(/"/g,'""')+'"').join(","))).join("\n");
-  try{await navigator.clipboard.writeText(csv);$("#copy-msg").textContent="Kopiert · Copied";}catch(e){$("#copy-msg").textContent="Kopieren nicht möglich";}
-});
 
 /* initial route */
 if(worldBy(location.hash.slice(1))) showWorld(location.hash.slice(1),false);
