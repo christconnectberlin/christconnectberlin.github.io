@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Christ Connect Berlin · Finde deinen Platz</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wdth,wght@75..100,400..700&family=Instrument+Serif:ital@1&display=swap" rel="stylesheet">
+<link rel="preload" href="fonts/InstrumentSans-Variable.ttf" as="font" type="font/ttf" crossorigin>
 <style>
+@font-face{font-family:"Instrument Sans";src:url("fonts/InstrumentSans-Variable.ttf") format("truetype");font-weight:400 700;font-stretch:75% 100%;font-display:swap}
+@font-face{font-family:"Instrument Serif";src:url("fonts/InstrumentSerif-Italic.ttf") format("truetype");font-style:italic;font-weight:400;font-display:swap}
 :root{
   --forest:#0F2A1D;--pine:#0B6B3A;--green:#1F9A47;--lime:#96C84F;--chalk:#F4F2EA;--ink:#121714;--spark:#E4F53C;
   --mint:#DDEFD8;--moss:#1C4430;--stone:#D8D4C6;--sage:#4D6957;--fog:#A9BFB0;
@@ -323,7 +323,7 @@ th{font-weight:400;letter-spacing:.1em;text-transform:uppercase;color:var(--text
         <label class="chk"><input type="checkbox" name="interest" value="Samstagstreffen"> Samstagstreffen in Lichtenberg</label>
       </fieldset>
       <label class="chk"><input type="checkbox" name="age16" required> Ich bin 16 oder älter. · I'm 16 or older.</label>
-      <label class="chk"><input type="checkbox" name="consent" required> <span>Ich bin einverstanden, dass Christ Connect Berlin meine Angaben speichert, um mich zu einem Treffen oder einer Bibelgruppe einzuladen. Ich kann das jederzeit widerrufen. <a href="[Datenschutz-Link]" style="color:inherit">Datenschutz</a></span></label>
+      <label class="chk"><input type="checkbox" name="consent" required> <span>Ich bin einverstanden, dass Christ Connect Berlin meine Angaben speichert, um mich zu einem Treffen oder einer Bibelgruppe einzuladen. Ich kann das jederzeit widerrufen. <a href="datenschutz.html" style="color:inherit">Datenschutz</a></span></label>
       <p class="err" id="err" role="alert"></p>
       <button class="btn btn-primary" type="submit"><span>Platz reservieren<small>Save my seat</small></span><svg class="ic"><use href="#i-arrow"/></svg></button>
       <p class="note">Wir speichern nur, was du hier einträgst. Deine Quiz-Antworten bleiben bei dir. · We only store what you enter here; your quiz answers stay with you.</p>
@@ -337,7 +337,7 @@ th{font-weight:400;letter-spacing:.1em;text-transform:uppercase;color:var(--text
       <p>Ein entspannter Safe Space für Spaß, echte Gespräche, Glauben entdecken &amp; Fragen stellen.<span>A relaxed safe space for fun, real talk, discovering faith and asking questions.</span></p>
       <svg class="mark" role="img" aria-label="Christ Connect Logo" fill="#F4F2EA"><use href="#cc-mark"/></svg>
     </div>
-    <div class="legal"><a href="https://www.instagram.com/christ.connect.berlin/">Instagram</a><a href="[Impressum-Link]">Impressum</a><a href="[Datenschutz-Link]">Datenschutz</a></div>
+    <div class="legal"><a href="https://www.instagram.com/christ.connect.berlin/">Instagram</a><a href="impressum.html">Impressum</a><a href="datenschutz.html">Datenschutz</a></div>
   </div>
 </footer>
 </main>
@@ -448,7 +448,6 @@ const FAITH_Q = [["Ich hab ehrliche Fragen","I have honest questions","questions
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const RM=matchMedia("(prefers-reduced-motion: reduce)").matches;
-const store={get(k){try{return JSON.parse(localStorage.getItem(k)||"null")}catch(e){return null}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
 const buzz=()=>{try{navigator.vibrate&&navigator.vibrate(8)}catch(e){}};
 const italic=s=>esc(s).replace(/\*(.+?)\*/g,"<em>$1</em>");
 const photo=(src,cls="")=>`<div class="photo ${cls} ${src?"has":""}" ${src?`style="background-image:url('${esc(src)}')"`:""} role="img" aria-label="Foto"></div>`;
