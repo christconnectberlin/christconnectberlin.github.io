@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Christ Connect Berlin · Finde deinen Platz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wdth,wght@75..100,400..700&family=Instrument+Serif:ital@1&display=swap" rel="stylesheet">
+<style>
+:root{
+  --forest:#0F2A1D;--pine:#0B6B3A;--green:#1F9A47;--lime:#96C84F;--chalk:#F4F2EA;--ink:#121714;--spark:#E4F53C;
+  --mint:#DDEFD8;--moss:#1C4430;--stone:#D8D4C6;--sage:#4D6957;--fog:#A9BFB0;
+  --font-display:"Instrument Sans",system-ui,sans-serif;--font-sans:"Instrument Sans",system-ui,sans-serif;--font-serif:"Instrument Serif",Georgia,serif;
+  --radius-sm:4px;
+  --ease:cubic-bezier(.2,.7,.2,1);--ease-io:cubic-bezier(.65,0,.35,1);
+  --d1:180ms;--d2:360ms;--d3:640ms;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:var(--font-sans);-webkit-font-smoothing:antialiased;background:var(--forest);color:var(--chalk);font-size:17px;line-height:1.5;overflow-x:hidden}
+button{font:inherit;color:inherit}
+.wrap{max-width:560px;margin:0 auto;padding:0 22px}
+/* themes (semantic tokens) */
+.t-forest{background:var(--forest);color:var(--chalk);--text:var(--chalk);--text-muted:var(--fog);--brand:var(--lime);--hairline:#2E5340;--raised:var(--moss);--slot:var(--moss);--arc:var(--moss)}
+.t-pine{background:var(--pine);color:var(--chalk);--text:var(--chalk);--text-muted:#D3E6D6;--brand:var(--lime);--hairline:rgba(244,242,234,.35);--raised:#0E5E34;--slot:#0E5E34;--arc:#0E7A43}
+.t-lime{background:var(--lime);color:var(--forest);--text:var(--forest);--text-muted:var(--forest);--brand:var(--forest);--hairline:rgba(15,42,29,.35);--raised:#A6D163;--slot:#86B544;--arc:#86B544}
+.t-mint{background:var(--mint);color:var(--ink);--text:var(--ink);--text-muted:var(--sage);--brand:var(--pine);--hairline:#B6D3AE;--raised:#FFFFFF;--slot:#C9E3C2;--arc:#C9E3C2}
+.t-chalk{background:var(--chalk);color:var(--ink);--text:var(--ink);--text-muted:var(--sage);--brand:var(--pine);--hairline:var(--stone);--raised:#FFFFFF;--slot:#E4E1D5;--arc:var(--mint)}
+section{padding:64px 0}
+.bar{display:flex;justify-content:space-between;gap:4px 12px;flex-wrap:wrap;font-size:12px;line-height:16px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted)}
+.bar>*{white-space:nowrap}
+.bar b{font-weight:400;color:var(--text)}
+/* headlines */
+.hl{font-family:var(--font-display);font-stretch:75%;font-weight:700;line-height:.9;letter-spacing:-.01em;margin:0}
+.hl em{font-family:var(--font-serif);font-style:italic;font-weight:400;font-size:1.08em;letter-spacing:-.01em}
+.hl-xl{font-size:clamp(64px,19vw,104px)}
+.hl-l{font-size:clamp(46px,13vw,68px)}
+.spark{color:var(--spark)}
+.sub{color:var(--text-muted);margin:14px 0 0}
+.lead{font-size:18px;margin:22px 0 0}
+.rule{border:0;border-top:2px solid var(--hairline);margin:0}
+.ic{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.tag{display:inline-block;background:var(--spark);color:var(--forest);font-size:12px;letter-spacing:.12em;text-transform:uppercase;padding:6px 10px;font-weight:600}
+
+/* ---------- motion: reveal ---------- */
+.line{display:block;overflow:hidden;padding-bottom:.18em;margin-bottom:-.18em}
+.line>span{display:inline-block;transform:translateY(105%);transition:transform var(--d3) var(--ease);transition-delay:calc(var(--i,0) * 90ms)}
+.in .line>span,.line.in>span{transform:none}
+[data-reveal]{opacity:0;transform:translateY(18px);transition:opacity var(--d3) var(--ease),transform var(--d3) var(--ease);transition-delay:calc(var(--i,0) * 70ms)}
+[data-reveal].in{opacity:1;transform:none}
+.ring circle{transition:stroke-dashoffset 1400ms var(--ease-io) 200ms}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{transition-duration:1ms!important;transition-delay:0ms!important;animation:none!important}
+  [data-reveal]{opacity:1;transform:none}.line>span{transform:none}
+}
+
+/* scroll progress */
+#progress{position:fixed;left:0;top:0;height:3px;width:100%;background:var(--lime);transform-origin:0 50%;transform:scaleX(0);z-index:30;pointer-events:none}
+
+/* ---------- hero ---------- */
+.hero{position:relative;overflow:hidden;padding:22px 0 44px}
+.hero .space{height:200px;position:relative}
+.ring{position:absolute;right:-56px;top:8px;width:184px;height:184px}
+.links{display:grid;gap:10px;margin-top:30px}
+.btn{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;font-size:17px;text-align:left;text-decoration:none;cursor:pointer;
+  border-radius:var(--radius-sm);padding:16px 18px;border:2px solid var(--hairline);background:transparent;color:var(--text);min-height:56px;
+  transition:border-color var(--d1) var(--ease),background-color var(--d1) var(--ease),transform var(--d1) var(--ease)}
+.btn:hover{border-color:var(--brand)}
+.btn:active{transform:scale(.98)}
+.btn:focus-visible,.tile:focus-visible,.half:focus-visible{outline:3px solid var(--brand);outline-offset:2px}
+.btn .ic{color:var(--brand);transition:transform var(--d2) var(--ease)}
+.btn:hover .ic{transform:translateX(4px)}
+.btn small{display:block;color:var(--text-muted);font-size:14px;line-height:1.35}
+.btn-primary{background:var(--lime);color:var(--forest);border-color:var(--lime)}
+.btn-primary small,.btn-primary .ic{color:var(--forest)}
+.t-chalk .btn-primary,.t-mint .btn-primary{background:var(--pine);border-color:var(--pine);color:var(--chalk)}
+.t-chalk .btn-primary small,.t-mint .btn-primary small,.t-chalk .btn-primary .ic,.t-mint .btn-primary .ic{color:var(--chalk)}
+.t-lime .btn-primary,.t-pine .btn-primary{background:var(--forest);border-color:var(--forest);color:var(--chalk)}
+.t-lime .btn-primary small,.t-pine .btn-primary small,.t-lime .btn-primary .ic,.t-pine .btn-primary .ic{color:var(--chalk)}
+
+/* photo slots */
+.photo{position:relative;background:var(--slot);background-size:cover;background-position:center;overflow:hidden}
+.photo:not(.has)::after{content:"[Foto ersetzen · replace photo]";position:absolute;left:10px;bottom:10px;right:10px;font-size:11px;letter-spacing:.06em;color:var(--text-muted)}
+.strip{overflow:hidden;padding:4px 0 0}
+.strip-track{display:flex;gap:10px;width:max-content;animation:marquee 46s linear infinite}
+.strip:hover .strip-track{animation-play-state:paused}
+.strip .photo{width:150px;height:200px;flex:none}
+@keyframes marquee{to{transform:translateX(-50%)}}
+
+/* activities */
+.acts{display:grid;gap:26px;margin-top:30px}
+.act .photo{aspect-ratio:4/3;width:100%}
+.act-row{display:flex;gap:12px;align-items:flex-start;border-top:2px solid var(--hairline);padding-top:14px;margin-top:12px}
+.act h3{font-family:var(--font-display);font-stretch:75%;font-weight:700;font-size:30px;line-height:1;margin:0 0 6px}
+.act p{margin:0;font-size:15px;line-height:1.45}
+.act p span{display:block;color:var(--text-muted)}
+.act .ic{color:var(--brand);width:28px;height:28px;margin-top:2px}
+
+/* district tiles */
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:30px}
+.tile{position:relative;overflow:hidden;border:0;border-radius:0;text-align:left;cursor:pointer;padding:16px 14px 14px;min-height:150px;display:flex;flex-direction:column;justify-content:space-between;
+  transition:transform var(--d2) var(--ease)}
+.tile:hover{transform:translateY(-3px)}
+.tile:active{transform:scale(.98)}
+.tile .tn{font-family:var(--font-display);font-stretch:75%;font-weight:700;font-size:clamp(24px,7vw,32px);line-height:.95;position:relative;z-index:1;hyphens:manual}
+.tile{box-shadow:inset 0 0 0 2px var(--hairline)}
+.tile.ghost{background:transparent;color:var(--text)}
+.tile .tm{font-size:13px;line-height:1.35;color:var(--text-muted);position:relative;z-index:1;display:flex;justify-content:space-between;align-items:flex-end;gap:6px}
+.tile .tm .ic{color:var(--text)}
+.tile svg.tarc{position:absolute;width:120px;height:120px;right:-34px;top:-30px;z-index:0}
+.tile.wide{grid-column:1 / -1;min-height:96px}
+
+/* schedule */
+.rows{margin-top:28px;border-top:2px solid var(--hairline)}
+.row{display:grid;grid-template-columns:58px 1fr auto;gap:12px;align-items:baseline;padding:16px 0;border-bottom:2px solid var(--hairline)}
+.row .day{font-family:var(--font-display);font-stretch:75%;font-weight:700;font-size:24px;line-height:1}
+.row .t{font-size:16px;line-height:1.35}
+.row .t span{display:block;color:var(--text-muted);font-size:14px}
+.row .time{font-variant-numeric:tabular-nums;font-size:15px;color:var(--text-muted)}
+
+/* form */
+form{display:grid;gap:16px;margin-top:28px}
+label.f{display:grid;gap:6px;font-size:14px;letter-spacing:.06em;color:var(--text-muted)}
+input[type=text],select{font:inherit;font-size:17px;color:var(--text);background:var(--raised);border:2px solid var(--hairline);border-radius:var(--radius-sm);padding:13px 14px;width:100%;transition:border-color var(--d1)}
+input[type=text]:focus,select:focus{outline:none;border-color:var(--brand)}
+fieldset{border:0;padding:0;margin:0;display:grid;gap:8px}
+legend{font-size:14px;letter-spacing:.06em;color:var(--text-muted);margin-bottom:6px;padding:0}
+.chk{display:flex;gap:12px;align-items:flex-start;font-size:15px;line-height:1.45}
+.chk input{width:22px;height:22px;flex:none;margin:1px 0 0;accent-color:var(--pine)}
+.note{font-size:13px;line-height:1.5;color:var(--text-muted);margin:0}
+.err{color:#8A1C1C;font-size:14px;margin:0}
+.shake{animation:shake 360ms var(--ease)}
+@keyframes shake{20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(3px)}}
+
+/* footer */
+footer{padding:44px 0 110px}
+.foot{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;border-top:2px solid var(--hairline);padding-top:22px}
+.foot p{margin:0;font-size:14px;line-height:1.5}
+.foot p span{display:block;color:var(--text-muted)}
+.mark{width:64px;height:68px;flex:none}
+.legal{display:flex;gap:18px;margin-top:22px;font-size:13px;flex-wrap:wrap}
+.legal a,.legal button{color:var(--text-muted);background:none;border:0;padding:0;cursor:pointer;text-decoration:underline;font-size:13px}
+
+/* sticky CTA */
+#dock{position:fixed;left:0;right:0;bottom:0;z-index:15;padding:10px 16px calc(10px + env(safe-area-inset-bottom));pointer-events:none;
+  transform:translateY(120%);transition:transform var(--d2) var(--ease)}
+#dock.on{transform:none}
+#dock .wrap{padding:0}
+#dock .btn{pointer-events:auto;min-height:52px;padding:12px 16px}
+
+/* ---------- world view ---------- */
+#world{display:none;min-height:100vh}
+body.in-world #home{display:none}
+body.in-world #world{display:block}
+.w-hero{position:relative;overflow:hidden;padding:22px 0 0}
+.w-back{background:none;border:0;cursor:pointer;color:var(--text);font-size:12px;letter-spacing:.14em;text-transform:uppercase;padding:0;display:flex;align-items:center;gap:6px}
+.w-back .ic{width:18px;height:18px;transform:rotate(180deg)}
+.w-space{height:200px;position:relative}
+.w-ring{position:absolute;width:184px;height:184px;top:8px}
+.w-photo{aspect-ratio:4/5;width:100%;margin-top:32px}
+.w-info{margin-top:30px;border-top:2px solid var(--hairline)}
+.w-info div{display:grid;grid-template-columns:90px 1fr;gap:12px;padding:14px 0;border-bottom:2px solid var(--hairline);font-size:16px;line-height:1.4}
+.w-info dt{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);padding-top:3px}
+.w-info dd{margin:0}
+.w-next{display:flex;gap:8px;overflow-x:auto;margin-top:28px;padding-bottom:6px;scrollbar-width:none}
+.w-next button{flex:none;border:2px solid var(--hairline);background:transparent;border-radius:var(--radius-sm);padding:10px 14px;cursor:pointer;font-size:14px;color:var(--text);white-space:nowrap}
+.w-next button:hover{border-color:var(--brand)}
+
+/* circle transition */
+#wipe{position:fixed;inset:0;z-index:40;pointer-events:none;clip-path:circle(0 at 50% 50%);opacity:1}
+
+/* ---------- overlays ---------- */
+.overlay{position:fixed;inset:0;z-index:20;overflow-y:auto;visibility:hidden;opacity:0;transform:translateY(24px);
+  transition:opacity var(--d2) var(--ease),transform var(--d2) var(--ease),visibility 0s linear var(--d2)}
+.overlay.on{visibility:visible;opacity:1;transform:none;transition-delay:0s}
+.ov-in{max-width:560px;margin:0 auto;padding:22px 22px 40px;min-height:100%;display:flex;flex-direction:column}
+.close{background:none;border:0;color:var(--text-muted);font-size:12px;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;padding:0}
+
+/* quiz */
+.segs{display:flex;gap:4px;margin-top:18px}
+.segs i{flex:1;height:3px;background:var(--hairline);position:relative;overflow:hidden}
+.segs i::after{content:"";position:absolute;inset:0;background:var(--lime);transform:scaleX(0);transform-origin:0 50%;transition:transform var(--d2) var(--ease)}
+.segs i.done::after{transform:scaleX(1)}
+.stage{flex:1;display:flex;flex-direction:column;justify-content:flex-end;padding-top:40px}
+.q-kicker{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted)}
+.q-title{font-size:clamp(40px,11vw,58px);margin:12px 0 4px}
+.deck{position:relative;height:300px;margin-top:24px;touch-action:pan-y}
+.qcard{position:absolute;inset:0;display:grid;grid-template-columns:1fr 1fr;background:var(--moss);border:2px solid var(--hairline);user-select:none;-webkit-user-select:none;
+  transition:transform var(--d2) var(--ease),opacity var(--d2) var(--ease);will-change:transform}
+.qcard.enter{transform:scale(.94) translateY(14px);opacity:0}
+.qcard.drag{transition:none}
+.qcard .or{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-family:var(--font-serif);font-style:italic;font-size:26px;color:var(--fog);background:var(--moss);padding:4px 8px;pointer-events:none}
+.half{border:0;background:transparent;cursor:pointer;color:var(--chalk);padding:18px 14px;display:flex;flex-direction:column;justify-content:flex-end;text-align:left;transition:background-color var(--d1) var(--ease),color var(--d1) var(--ease)}
+.half+.half{border-left:2px solid var(--hairline)}
+.half b{font-family:var(--font-display);font-stretch:75%;font-weight:700;font-size:30px;line-height:.95}
+.half small{display:block;color:var(--fog);font-size:13px;margin-top:8px;line-height:1.3}
+.half .ic{width:34px;height:34px;color:var(--lime);margin-bottom:auto}
+.half.hot{background:var(--lime);color:var(--forest)}
+.half.hot small,.half.hot .ic{color:var(--forest)}
+.swipe-hint{display:flex;justify-content:space-between;margin-top:14px;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--fog)}
+.opts{display:grid;gap:10px;margin-top:24px}
+.opts.grid2{grid-template-columns:1fr 1fr}
+.pop{animation:pop var(--d2) var(--ease)}
+@keyframes pop{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+/* result */
+.story{position:relative;width:min(300px,78vw);aspect-ratio:9/16;margin:22px auto 0;background:var(--forest);border:2px solid var(--hairline);padding:22px 20px;display:flex;flex-direction:column;overflow:hidden}
+.story .bar{font-size:10px}
+.story .ring{width:210px;height:210px;right:-60px;top:20px}
+.story .hl{font-size:52px;margin-top:auto;position:relative}
+.story p{position:relative;margin:10px 0 0;font-size:14px;line-height:1.35}
+.story .sfoot{display:flex;justify-content:space-between;align-items:flex-end;border-top:2px solid var(--hairline);margin-top:18px;padding-top:12px;font-size:12px;color:var(--fog);position:relative}
+.story .mark{width:40px;height:42px}
+.res-block{border-top:2px solid var(--hairline);padding:18px 0 4px;margin-top:22px}
+.res-block h4{margin:0 0 6px;font-size:12px;letter-spacing:.14em;text-transform:uppercase;font-weight:400;color:var(--text-muted)}
+.res-block p{margin:0}
+.res-block p+p{margin-top:6px;color:var(--text-muted);font-size:15px}
+table{width:100%;border-collapse:collapse;font-size:13px;margin-top:16px}
+th,td{text-align:left;padding:8px 6px;border-bottom:2px solid var(--hairline);vertical-align:top}
+th{font-weight:400;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);font-size:11px}
+@media (min-width:720px){section{padding:96px 0}.hero .space{height:210px}.acts{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div id="progress"></div>
+<div id="wipe"></div>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="ccg" gradientUnits="userSpaceOnUse" x1="87" y1="0" x2="499" y2="0"><stop offset="0" stop-color="#078646"/><stop offset=".5" stop-color="#33A345"/><stop offset="1" stop-color="#96C84F"/></linearGradient>
+    <symbol id="cc-mark" viewBox="76 59 436 458"><path fill-rule="evenodd" d="M131.78 404.24A206 206 0 0 1 280.50 70.38L280.50 95.43A181 181 0 0 0 151.35 388.68Z M323.50 72.27A206 206 0 0 1 454.22 404.24L434.65 388.68A181 181 0 0 0 323.50 97.59Z M279 141H314V196H378V230H314V363H279V230H214V196H279Z M159.5 342a23.5 23.5 0 1 0 47 0a23.5 23.5 0 1 0 -47 0Z M381.5 341.5a23.5 23.5 0 1 0 47 0a23.5 23.5 0 1 0 -47 0Z M286.68 365.54L263.11 365.61L246.36 366.12L238.69 366.59L231.49 367.19L224.32 367.98L217.63 368.92L210.96 370.06L204.32 371.43L197.71 373.05L191.58 374.80L185.92 376.66L180.34 378.77L175.30 380.96L170.40 383.43L165.67 386.19L161.52 389.01L157.58 392.11L153.87 395.53L150.75 398.92L147.95 402.54L145.54 406.39L143.80 410.02L142.51 413.79L141.78 417.25L141.44 421.22L141.58 425.22L142.15 429.23L143.14 433.17L144.51 437.01L146.45 441.10L148.05 443.82L150.09 446.75L152.06 449.16L154.49 451.77L157.10 454.24L159.85 456.57L163.12 459.05L166.52 461.40L170.82 464.14L176.03 467.22L200.50 480.90L212.03 486.92L222.53 491.81L231.22 495.30L239.31 498.04L248.07 500.46L257.02 502.40L266.55 503.95L276.14 505.00L285.72 505.57L295.28 505.66L305.70 505.23L316.51 504.20L326.78 502.66L337.39 500.49L347.43 497.89L357.76 494.63L367.91 490.84L377.86 486.52L383.16 483.97L388.40 481.26L399.45 474.98L406.43 470.69L414.88 465.27L422.12 460.49L426.59 457.30L429.47 455.01L431.90 452.86L434.53 450.24L436.70 447.80L438.98 444.89L440.79 442.23L442.40 439.49L443.79 436.67L445.23 432.96L446.13 429.59L446.70 425.75L446.77 422.31L446.42 418.87L445.58 415.02L444.30 411.23L442.61 407.52L440.58 403.94L437.95 400.13L434.99 396.56L431.77 393.26L428.32 390.25L424.68 387.52L420.46 384.81L416.07 382.38L411.53 380.21L406.44 378.11L401.25 376.25L395.56 374.47L389.40 372.79L383.22 371.34L376.57 370.01L369.90 368.90L363.20 367.99L356.48 367.27L342.09 366.23L325.82 365.69L304.31 365.55L299.80 377.00L299.80 380.12L305.51 380.48L310.68 381.02L315.79 381.75L321.32 382.78L326.72 384.03L331.50 385.37L336.14 386.89L341.06 388.75L345.35 390.62L349.85 392.87L353.71 395.07L357.35 397.41L361.08 400.14L364.20 402.75L367.06 405.47L369.89 408.59L371.73 410.93L373.39 413.32L374.85 415.76L376.26 418.55L377.42 421.39L378.24 423.94L378.86 426.51L379.27 429.10L379.47 431.70L379.47 434.30L379.23 437.22L378.79 439.81L378.15 442.38L377.31 444.93L376.12 447.76L374.85 450.24L372.99 453.28L371.07 455.95L368.90 458.56L366.23 461.35L363.60 463.78L360.42 466.37L357.35 468.59L353.71 470.93L349.85 473.13L346.19 474.98L342.37 476.70L337.96 478.46L333.84 479.89L329.13 481.32L324.28 482.56L319.82 483.53L315.28 484.33L310.17 485.04L305.51 485.52L300.29 485.86L295.57 485.99L290.33 485.95L285.62 485.74L280.42 485.33L275.27 484.71L270.69 483.99L266.19 483.12L261.28 481.97L256.50 480.63L251.86 479.11L247.37 477.43L243.49 475.76L238.55 473.34L233.91 470.71L229.60 467.86L225.64 464.83L222.05 461.63L218.84 458.27L216.05 454.77L213.68 451.16L211.74 447.45L210.25 443.66L209.21 439.81L208.63 435.93L208.51 432.02L208.86 428.13L209.67 424.26L210.94 420.44L212.82 416.37L215.42 412.12L218.35 408.30L221.77 404.65L225.64 401.17L229.95 397.89L234.67 394.84L240.17 391.82L245.63 389.30L251.86 386.89L257.92 384.95L264.21 383.32L270.69 382.01L277.32 381.02L284.05 380.36L291.20 380.03L291.20 377.00Z"/></symbol>
+    <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5L18 18M6 18l2.5-2.5M15.5 8.5L18 6"/></symbol>
+    <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="1"/><path d="M3.5 10h17M8 3v4M16 3v4"/></symbol>
+    <symbol id="i-loc" viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></symbol>
+    <symbol id="i-bible" viewBox="0 0 24 24"><path d="M5 4.5A1.5 1.5 0 0 1 6.5 3H19v15H6.5A1.5 1.5 0 0 0 5 19.5z"/><path d="M5 19.5A1.5 1.5 0 0 0 6.5 21H19v-3M12 6.5v7M9.5 9h5"/></symbol>
+    <symbol id="i-people" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><circle cx="17" cy="9" r="2.5"/><path d="M15.5 14.2A4.5 4.5 0 0 1 21 18.5"/></symbol>
+    <symbol id="i-chat" viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></symbol>
+    <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+    <symbol id="i-ball" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5l4 3-1.5 4.5h-5L8 10.5z"/></symbol>
+    <symbol id="i-bar" viewBox="0 0 24 24"><path d="M3 7h18M7 7v13M17 7v13M12 4v3"/></symbol>
+    <symbol id="i-flower" viewBox="0 0 24 24"><circle cx="12" cy="9" r="2.5"/><path d="M12 6.5V3M12 11.5V21M9.6 8.2L6.5 6.5M14.4 8.2l3.1-1.7M9.6 9.8L6.5 11.5M14.4 9.8l3.1 1.7M12 16c-2-2-5-2-6-1M12 18c2-2 5-2 6-1"/></symbol>
+    <symbol id="i-cup" viewBox="0 0 24 24"><path d="M4 9h13v5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5zM17 10.5h1.5a2.5 2.5 0 0 1 0 5H17M8 3.5c0 1.2 1 1.3 1 2.5M12 3.5c0 1.2 1 1.3 1 2.5"/></symbol>
+    <symbol id="i-question" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M9.6 9.3a2.5 2.5 0 1 1 3.4 2.3c-.7.3-1 .8-1 1.6v.3M12 16.8v.2"/></symbol>
+    <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 20s-7.5-4.6-7.5-10A4.3 4.3 0 0 1 12 7.3 4.3 4.3 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10z"/></symbol>
+  </defs>
+</svg>
+
+<!-- ================= HOME ================= -->
+<main id="home">
+<header class="t-forest hero" id="top">
+  <div class="wrap">
+    <div class="bar" data-reveal><b>Christ Connect · Berlin</b><span>@christ.connect.berlin</span></div>
+    <div class="space">
+      <svg class="ring" viewBox="0 0 200 200" aria-hidden="true"><circle cx="100" cy="100" r="82" fill="none" stroke="#1C4430" stroke-width="20" data-ring/></svg>
+    </div>
+    <h1 class="hl hl-xl" data-lines><span class="line" style="--i:0"><span>Hier ist</span></span><span class="line" style="--i:1"><span>Platz für</span></span><span class="line" style="--i:2"><span><em class="spark">dich.</em></span></span></h1>
+    <p class="sub" data-reveal style="--i:3">There's room for you.</p>
+    <p class="lead" data-reveal style="--i:4">Wir sind eine christliche Community für junge Leute in Berlin. Samstags gibt's Spaß, echte Gespräche, und wir lesen zusammen die Bibel. Fragen sind willkommen.</p>
+    <p class="sub" data-reveal style="--i:5;margin-top:6px;font-size:15px">A Christian community for young people in Berlin: fun, real talk and reading the Bible together. Questions welcome.</p>
+
+    <nav class="links" aria-label="Links" id="hero-links">
+      <button class="btn btn-primary" data-open-quiz data-reveal style="--i:6"><span>Was ist dein Samstags-Vibe?<small>Swipe-Spiel · 60 Sekunden</small></span><svg class="ic"><use href="#i-spark"/></svg></button>
+      <a class="btn" href="#kieze" data-scroll data-reveal style="--i:7"><span>Dein Kiez<small>Spandau, Neukölln, Charlottenburg, Steglitz, Lichtenberg</small></span><svg class="ic"><use href="#i-loc"/></svg></a>
+      <a class="btn" href="#aktivitaeten" data-scroll data-reveal style="--i:8"><span>Was wir machen<small>Living Room, Beauty Day, Football, Calisthenics</small></span><svg class="ic"><use href="#i-people"/></svg></a>
+      <a class="btn" href="#treffen" data-scroll data-reveal style="--i:9"><span>Nächste Termine<small>Samstags · S+U Lichtenberg</small></span><svg class="ic"><use href="#i-cal"/></svg></a>
+      <a class="btn" href="[WhatsApp-Link]" data-reveal style="--i:10"><span>Schreib uns auf WhatsApp<small>[WhatsApp-Link]</small></span><svg class="ic"><use href="#i-chat"/></svg></a>
+    </nav>
+  </div>
+</header>
+
+<section class="t-forest" style="padding:0 0 56px" aria-label="Fotos">
+  <div class="strip" data-reveal><div class="strip-track" id="strip"></div></div>
+</section>
+
+<section class="t-chalk" id="aktivitaeten">
+  <div class="wrap">
+    <div class="bar" data-reveal><b>Aktivitäten</b><span>What we do</span></div>
+    <h2 class="hl hl-l" style="margin-top:64px" data-lines><span class="line"><span>Such dir aus,</span></span><span class="line" style="--i:1"><span>wo du <em>startest.</em></span></span></h2>
+    <p class="sub" data-reveal>Pick where you start.</p>
+    <div class="acts" id="acts"></div>
+  </div>
+</section>
+
+<section class="t-mint" id="kieze">
+  <div class="wrap">
+    <div class="bar" data-reveal><b>Dein Kiez</b><span>Your neighbourhood</span></div>
+    <h2 class="hl hl-l" style="margin-top:64px" data-lines><span class="line"><span>Welcher Kiez</span></span><span class="line" style="--i:1"><span>ist <em>deiner?</em></span></span></h2>
+    <p class="sub" data-reveal>Jeder Bezirk hat seine Gruppe, seine Leute, seinen Vibe. Tipp drauf. · Every district has its own group. Tap in.</p>
+    <div class="tiles" id="tiles"></div>
+  </div>
+</section>
+
+<section class="t-chalk" id="treffen">
+  <div class="wrap">
+    <div class="bar" data-reveal><b>Termine</b><span>Coming up</span></div>
+    <h2 class="hl hl-l" style="margin-top:64px" data-lines><span class="line"><span>Was <em>läuft?</em></span></span></h2>
+    <p class="sub" data-reveal>What's on?</p>
+    <div class="rows" id="events"></div>
+    <p class="note" style="margin-top:14px" data-reveal>Treffpunkt samstags · Saturdays: S+U Lichtenberg, Archenholdstraße 25, 10315 Berlin</p>
+  </div>
+</section>
+
+<section class="t-chalk" id="anmelden" style="padding-top:0">
+  <div class="wrap">
+    <hr class="rule">
+    <div class="bar" style="margin-top:22px" data-reveal><b>Platz reservieren</b><span>Save a seat</span></div>
+    <h2 class="hl hl-l" style="margin-top:64px" data-lines><span class="line"><span>Wir halten dir</span></span><span class="line" style="--i:1"><span>einen Platz <em>frei.</em></span></span></h2>
+    <p class="sub" data-reveal>We'll save you a seat.</p>
+    <form id="signup" novalidate data-reveal>
+      <label class="f">Vorname · First name<input type="text" name="name" autocomplete="given-name" required></label>
+      <label class="f">Wie erreichen wir dich? · Instagram, WhatsApp oder E-Mail<input type="text" name="contact" required placeholder="@name, +49 … oder mail@…"></label>
+      <label class="f">Bezirk · District<select name="district" required></select></label>
+      <fieldset>
+        <legend>Was interessiert dich? · What are you into?</legend>
+        <label class="chk"><input type="checkbox" name="interest" value="Bibelgruppe"> Bibelgruppe in meinem Bezirk · Bible study</label>
+        <label class="chk"><input type="checkbox" name="interest" value="Living Room Session"> Living Room Session</label>
+        <label class="chk"><input type="checkbox" name="interest" value="Beauty Day"> Beauty Day</label>
+        <label class="chk"><input type="checkbox" name="interest" value="Football"> Football</label>
+        <label class="chk"><input type="checkbox" name="interest" value="Calisthenics"> Calisthenics</label>
+        <label class="chk"><input type="checkbox" name="interest" value="Samstagstreffen"> Samstagstreffen in Lichtenberg</label>
+      </fieldset>
+      <label class="chk"><input type="checkbox" name="age16" required> Ich bin 16 oder älter. · I'm 16 or older.</label>
+      <label class="chk"><input type="checkbox" name="consent" required> <span>Ich bin einverstanden, dass Christ Connect Berlin meine Angaben speichert, um mich zu einem Treffen oder einer Bibelgruppe einzuladen. Ich kann das jederzeit widerrufen. <a href="[Datenschutz-Link]" style="color:inherit">Datenschutz</a></span></label>
+      <p class="err" id="err" role="alert"></p>
+      <button class="btn btn-primary" type="submit"><span>Platz reservieren<small>Save my seat</small></span><svg class="ic"><use href="#i-arrow"/></svg></button>
+      <p class="note">Wir speichern nur, was du hier einträgst. Deine Quiz-Antworten bleiben bei dir. · We only store what you enter here; your quiz answers stay with you.</p>
+    </form>
+  </div>
+</section>
+
+<footer class="t-forest">
+  <div class="wrap">
+    <div class="foot" data-reveal>
+      <p>Ein entspannter Safe Space für Spaß, echte Gespräche, Glauben entdecken &amp; Fragen stellen.<span>A relaxed safe space for fun, real talk, discovering faith and asking questions.</span></p>
+      <svg class="mark" role="img" aria-label="Christ Connect Logo" fill="#F4F2EA"><use href="#cc-mark"/></svg>
+    </div>
+    <div class="legal"><a href="https://www.instagram.com/christ.connect.berlin/">Instagram</a><a href="[Impressum-Link]">Impressum</a><a href="[Datenschutz-Link]">Datenschutz</a><button type="button" data-open-team>Team · Demo</button></div>
+  </div>
+</footer>
+</main>
+
+<!-- ================= WORLD ================= -->
+<div id="world"></div>
+
+<!-- sticky CTA -->
+<div id="dock"><div class="wrap"><button class="btn btn-primary" data-open-quiz><span>Was ist dein Samstags-Vibe?<small>Swipe-Spiel · 60 Sek.</small></span><svg class="ic"><use href="#i-spark"/></svg></button></div></div>
+
+<!-- quiz -->
+<div class="overlay t-forest" id="quiz" role="dialog" aria-modal="true" aria-label="Quiz">
+  <div class="ov-in">
+    <div class="bar"><b id="q-label">Samstags-Vibe</b><button class="close" data-close>Schließen</button></div>
+    <div class="segs" id="segs"></div>
+    <div class="stage" id="stage"></div>
+  </div>
+</div>
+
+<!-- thanks -->
+<div class="overlay t-forest" id="thanks" role="dialog" aria-modal="true" aria-label="Danke">
+  <div class="ov-in">
+    <div class="bar"><b>Christ Connect · Berlin</b><button class="close" data-close>Schließen</button></div>
+    <div class="stage">
+      <h2 class="hl hl-l">Dein Platz ist <em>frei.</em></h2>
+      <p class="sub">Your seat is saved.</p>
+      <p class="lead" id="thanks-txt"></p>
+      <div class="links"><a class="btn" href="[WhatsApp-Link]"><span>Schon jetzt Hallo sagen<small>[WhatsApp-Link]</small></span><svg class="ic"><use href="#i-chat"/></svg></a></div>
+    </div>
+  </div>
+</div>
+
+<!-- team demo -->
+<div class="overlay t-chalk" id="team" role="dialog" aria-modal="true" aria-label="Team-Demo">
+  <div class="ov-in">
+    <div class="bar"><b>Anmeldungen · Demo</b><button class="close" data-close>Schließen</button></div>
+    <p class="note" style="margin-top:22px">Prototyp: Anmeldungen landen nur in diesem Browser. Live gehen sie direkt in das Team-Sheet (siehe <code>SUBMIT_URL</code>).</p>
+    <div id="team-list"></div>
+    <div class="links"><button class="btn" id="copy-csv"><span>Als CSV kopieren<small id="copy-msg">Für Google Sheets einfügen</small></span><svg class="ic"><use href="#i-link"/></svg></button></div>
+  </div>
+</div>
+
+<script>
+/* ================= CONFIG ================= */
+const SUBMIT_URL = ""; // live: Google Apps Script Web-App-URL
+const PAGE_URL = "https://christconnectberlin.github.io/"; // live: öffentlicher Link der Seite (z. B. GitHub Pages). Leer = aktuelle Adresse.
+
+/* Fotos: Dateinamen/URLs eintragen (z. B. "img/living-room.jpg"). Leer = markierter Platzhalter. */
+const PHOTOS = { strip:["","","","","",""], living:"", beauty:"", football:"", cali:"",
+  lichtenberg:"", spandau:"", neukoelln:"", charlottenburg:"", steglitz:"" };
+
+const ACTIVITIES = [
+  {id:"living", name:"Living Room Session", icon:"i-cup", de:"Sofa, Tee, ehrliche Gespräche.", en:"Couch, tea, honest talk."},
+  {id:"beauty", name:"Beauty Day", icon:"i-flower", de:"Zeit für dich und füreinander.", en:"Time for you and each other."},
+  {id:"football", name:"Football", icon:"i-ball", de:"Kicken, lachen, Team sein.", en:"Kick, laugh, be a team."},
+  {id:"cali", name:"Calisthenics", icon:"i-bar", de:"Gemeinsam trainieren, dranbleiben.", en:"Train together, keep going."}
+];
+
+/* Jeder Bezirk = eigene Welt: Grundfarbe, Logo-Version, Kreis-Position, Headline (ein Wort kursiv), Spark-Moment. */
+const WORLDS = [
+  {id:"lichtenberg", name:"Lichtenberg", theme:"forest", logo:"#F4F2EA", ring:{right:"-56px"},
+   hl:["Lichtenberg ist","unser","*Zuhause.*"], en:"Lichtenberg is home.", spark:"word",
+   lead:"Hier treffen wir uns samstags, alle Bezirke zusammen. Der Ort, an dem für viele alles anfängt.",
+   when:"Samstags · [Uhrzeit]", where:"S+U Lichtenberg, Archenholdstraße 25, 10315 Berlin", who:"[Name der Leitung]", acts:["Samstagstreffen","Living Room Session","Football"]},
+  {id:"spandau", name:"Spandau", theme:"pine", logo:"#F4F2EA", ring:{left:"-80px"},
+   hl:["Spandau,","rück","*auf.*"], en:"Spandau, make room.", spark:"tag",
+   lead:"Im Westen ist immer ein Platz frei. Kleine Gruppe, große Gespräche, die Bibel mittendrin.",
+   when:"[Tag · Uhrzeit]", where:"[Treffpunkt]", who:"[Name der Leitung]", acts:["Bibelgruppe","Living Room Session"]},
+  {id:"neukoelln", name:"Neukölln", theme:"lime", logo:"#0F2A1D", ring:{right:"-10px"},
+   hl:["Neukölln,","hier wird's","*ehrlich.*"], en:"Neukölln, let's get real.", spark:"tag",
+   lead:"Laut, bunt, direkt. Und mittendrin eine Runde, in der jede Frage zählt.",
+   when:"[Tag · Uhrzeit]", where:"[Treffpunkt]", who:"[Name der Leitung]", acts:["Bibelgruppe","Calisthenics","Football"]},
+  {id:"charlottenburg", name:"Charlottenburg", theme:"mint", logo:"url(#ccg)", ring:{left:"50%",ml:"-92px"},
+   hl:["Charlottenburg,","nimm dir","*Zeit.*"], en:"Charlottenburg, take your time.", spark:"tag",
+   lead:"Ruhig ankommen, gut zuhören, gemeinsam in die Bibel schauen. In deinem Tempo.",
+   when:"[Tag · Uhrzeit]", where:"[Treffpunkt]", who:"[Name der Leitung]", acts:["Bibelgruppe","Beauty Day"]},
+  {id:"steglitz", name:"Steglitz", theme:"chalk", logo:"url(#ccg)", ring:{right:"-110px"},
+   hl:["Steglitz,","setz dich","*dazu.*"], en:"Steglitz, pull up a chair.", spark:"tag",
+   lead:"Im Süden wartet ein Stuhl auf dich. Komm vorbei, bring Freunde mit.",
+   when:"[Tag · Uhrzeit]", where:"[Treffpunkt]", who:"[Name der Leitung]", acts:["Bibelgruppe","Living Room Session"]}
+];
+
+const EVENTS = [
+  {day:"Sa", date:"[Datum]", de:"Samstagstreffen", en:"Saturday gathering · Lichtenberg", time:"[Uhrzeit]"},
+  {day:"[Tag]", date:"[Datum]", de:"Living Room Session", en:"[Ort]", time:"[Uhrzeit]"},
+  {day:"[Tag]", date:"[Datum]", de:"Football", en:"[Ort]", time:"[Uhrzeit]"},
+  {day:"[Tag]", date:"[Datum]", de:"Beauty Day", en:"[Ort]", time:"[Uhrzeit]"}
+];
+
+const VIBES = {
+  talk:{name:"Sofa",en:"The couch vibe",act:"Living Room Session",line:"Echte Gespräche statt Smalltalk.",
+    de:"Du magst echte Gespräche statt Smalltalk. Bei der Living Room Session sitzt man zusammen, trinkt Tee und redet über das, was wirklich zählt.",ensub:"You like real talk. The Living Room Session is made for that."},
+  create:{name:"Kreativ",en:"The creative vibe",act:"Beauty Day",line:"Du machst Dinge schön.",
+    de:"Du hast ein Auge für Schönes und tankst auf, wenn du etwas gestaltest. Beim Beauty Day nehmt ihr euch Zeit für euch und füreinander.",ensub:"You recharge by creating. Beauty Day is your place."},
+  team:{name:"Team",en:"The team vibe",act:"Football",line:"Mit dir wird's eine Runde.",
+    de:"Du bringst Leute zusammen und lebst auf, wenn's ums Team geht. Beim Football lernst du die Leute am schnellsten kennen.",ensub:"You bring people together. Football is where you'll fit in fastest."},
+  push:{name:"Durchzieh",en:"The push-through vibe",act:"Calisthenics",line:"Du gibst nicht auf.",
+    de:"Du ziehst Dinge durch und magst Herausforderungen. Bei Calisthenics trainiert ihr zusammen und bleibt dran.",ensub:"You love a challenge. Calisthenics keeps you going, together."}
+};
+const FAITH = {
+  questions:{de:"Fragen sind hier willkommen. In einer Bibelgruppe kannst du alles fragen, ohne Druck.",en:"Bring your questions: a Bible study group is the place to ask them."},
+  deeper:{de:"Dann passt eine Bibelgruppe in deinem Bezirk: jede Woche ein Stück tiefer in die Bibel.",en:"A weekly Bible study in your district fits you."},
+  curious:{de:"Starte locker: komm zu einem Treffen, und wenn du magst, lest ihr zusammen in der Bibel. In deinem Tempo.",en:"Start easy, at your own pace."},
+  people:{de:"Komm erst mal vorbei und lern die Leute kennen. Die Bibelgruppe ist da, wenn du so weit bist.",en:"Come meet people first. Bible study is there when you're ready."}
+};
+/* This-or-That: jede Karte = zwei Vibes. Jeder Vibe kommt 3× vor. */
+const PAIRS = [
+  [["Tee & Talk","Tea & talk","talk","i-cup"],["Bolzplatz","Pitch","team","i-ball"]],
+  [["Pinsel","Brush","create","i-flower"],["Klimmzug","Pull-up","push","i-bar"]],
+  [["Kleine Runde","Small circle","talk","i-chat"],["Große Gruppe","Big crowd","team","i-people"]],
+  [["Gestalten","Create","create","i-spark"],["Ziel knacken","Hit the goal","push","i-arrow"]],
+  [["Zuhören","Listen","talk","i-heart"],["Durchziehen","Push through","push","i-bar"]],
+  [["Schön machen","Make it pretty","create","i-flower"],["Zusammen gewinnen","Win together","team","i-ball"]]
+];
+const FAITH_Q = [["Ich hab ehrliche Fragen","I have honest questions","questions"],["Ich glaube und will tiefer","I believe, want to go deeper","deeper"],["Neugierig, kenn mich kaum aus","Curious, new to this","curious"],["Erst mal Leute kennenlernen","Just meet people first","people"]];
+
+/* ================= HELPERS ================= */
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const RM=matchMedia("(prefers-reduced-motion: reduce)").matches;
+const store={get(k){try{return JSON.parse(localStorage.getItem(k)||"null")}catch(e){return null}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const buzz=()=>{try{navigator.vibrate&&navigator.vibrate(8)}catch(e){}};
+const italic=s=>esc(s).replace(/\*(.+?)\*/g,"<em>$1</em>");
+const photo=(src,cls="")=>`<div class="photo ${cls} ${src?"has":""}" ${src?`style="background-image:url('${esc(src)}')"`:""} role="img" aria-label="Foto"></div>`;
+const logo=(fill,cls="mark")=>`<svg class="${cls}" role="img" aria-label="Christ Connect Logo" style="fill:${fill}"><use href="#cc-mark"/></svg>`;
+const shy=n=>esc(n).replace(/(burg|berg)$/,'\u00AD$1');
+const worldBy=id=>WORLDS.find(w=>w.id===id);
+
+/* ring that draws itself (open at the top) */
+function setupRing(c,delay=0){
+  const r=+c.getAttribute("r"), C=2*Math.PI*r, gap=.09*C, vis=C-gap;
+  c.style.strokeDasharray=`${vis} ${gap}`;
+  c.style.transform=`rotate(${-90+16.2}deg)`; c.style.transformOrigin="50% 50%";
+  c.style.strokeDashoffset=vis;
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{c.style.transitionDelay=delay+"ms";c.style.strokeDashoffset=0;}));
+}
+
+/* smooth scroll with duration by distance */
+function scrollToY(y){
+  if(RM){scrollTo(0,y);return}
+  const s=scrollY,d=y-s,dur=Math.min(900,Math.max(420,Math.abs(d)*.45)),t0=performance.now();
+  const ease=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
+  (function step(now){const t=Math.min(1,(now-t0)/dur);scrollTo(0,s+d*ease(t));if(t<1)requestAnimationFrame(step)})(t0);
+}
+function goTo(id){const el=document.getElementById(id);if(el)scrollToY(el.getBoundingClientRect().top+scrollY-8)}
+
+/* reveal on scroll */
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add("in");io.unobserve(e.target)}}),{rootMargin:"0px 0px -8% 0px",threshold:.08});
+function observe(root=document){root.querySelectorAll("[data-reveal],[data-lines]").forEach(el=>{if(!el.classList.contains("in"))io.observe(el)})}
+
+/* ================= RENDER HOME ================= */
+$("#strip").innerHTML=[...PHOTOS.strip,...PHOTOS.strip].map(p=>photo(p)).join("");
+$("#acts").innerHTML=ACTIVITIES.map((a,i)=>`<article class="act" data-reveal style="--i:${i%2}">${photo(PHOTOS[a.id])}
+  <div class="act-row"><svg class="ic"><use href="#${a.icon}"/></svg><div><h3>${esc(a.name)}</h3><p>${esc(a.de)}<span>${esc(a.en)}</span></p></div></div></article>`).join("");
+$("#tiles").innerHTML=WORLDS.map((w,i)=>`<button class="tile t-${w.theme}" data-world="${w.id}" data-reveal style="--i:${i}">
+  <span class="tn">${shy(w.name)}</span><span class="tm"><span>${esc(w.when)}</span><svg class="ic"><use href="#i-arrow"/></svg></span></button>`).join("")
+  +`<button class="tile wide ghost" data-scroll-form data-reveal style="--i:5"><span class="tn" style="font-size:26px">Anderer Bezirk?</span><span class="tm"><span>Sag uns wo, wir finden was · Tell us where</span><svg class="ic"><use href="#i-arrow"/></svg></span></button>`;
+$("#events").innerHTML=EVENTS.map((e,i)=>`<div class="row" data-reveal style="--i:${i}"><div class="day">${esc(e.day)}</div><div class="t">${esc(e.de)}<span>${esc(e.date)} · ${esc(e.en)}</span></div><div class="time">${esc(e.time)}</div></div>`).join("");
+$("select[name=district]").innerHTML=`<option value="">Bitte wählen · Choose</option>`+WORLDS.map(w=>`<option>${esc(w.name)}</option>`).join("")+`<option>Anderer Bezirk</option>`;
+
+setupRing($("[data-ring]"),150);
+observe();
+$$("[data-scroll]").forEach(a=>a.addEventListener("click",e=>{e.preventDefault();goTo(a.getAttribute("href").slice(1))}));
+$("[data-scroll-form]").addEventListener("click",()=>{$("select[name=district]").value="Anderer Bezirk";goTo("anmelden")});
+
+/* scroll progress + dock */
+const heroLinks=$("#hero-links"), form=$("#anmelden");
+function onScroll(){
+  const h=document.documentElement.scrollHeight-innerHeight;
+  $("#progress").style.transform=`scaleX(${h>0?scrollY/h:0})`;
+  if(document.body.classList.contains("in-world")){$("#dock").classList.remove("on");return}
+  const past=heroLinks.getBoundingClientRect().bottom<0, nearForm=form.getBoundingClientRect().top<innerHeight*.9;
+  $("#dock").classList.toggle("on",past&&!nearForm);
+}
+addEventListener("scroll",onScroll,{passive:true});
+
+/* ================= WORLDS ================= */
+function renderWorld(w){
+  const r=w.ring, pos=Object.entries({left:r.left,right:r.right,top:r.top}).filter(x=>x[1]).map(([k,v])=>`${k}:${v}`).join(";")+(r.ml?`;margin-left:${r.ml}`:"");
+  const hl=w.hl.map((l,i)=>{let h=italic(l).replace(/(Charlotten)(burg)/,"$1\u00AD$2").replace(/(Lichten)(berg)/,"$1\u00AD$2"); if(w.spark==="word") h=h.replace("<em>",'<em class="spark">'); return `<span class="line" style="--i:${i}"><span>${h}</span></span>`}).join("");
+  const el=$("#world"); el.className="t-"+w.theme;
+  el.innerHTML=`<div class="w-hero">
+   <div class="wrap" style="position:relative">
+    <div class="bar"><button class="w-back" data-home><svg class="ic"><use href="#i-arrow"/></svg>Alle Kieze</button><span>Christ Connect · ${esc(w.name)}</span></div>
+    <div class="w-space"><svg class="w-ring" style="${pos}" viewBox="0 0 200 200" aria-hidden="true"><circle cx="100" cy="100" r="82" fill="none" stroke="var(--arc)" stroke-width="20" data-wring/></svg></div>
+    ${w.spark==="tag"?`<span class="tag" data-reveal>Bibelgruppe · ${esc(w.name)}</span><div style="height:18px"></div>`:""}
+    <h1 class="hl hl-xl" data-lines style="font-size:${w.name.length>10?"clamp(40px,11.5vw,72px)":"clamp(56px,16vw,96px)"}">${hl}</h1>
+    <p class="sub" data-reveal style="--i:3">${esc(w.en)}</p>
+    <p class="lead" data-reveal style="--i:4">${esc(w.lead)}</p>
+   </div></div>
+   <div class="wrap">
+    <div data-reveal>${photo(PHOTOS[w.id],"w-photo")}</div>
+    <dl class="w-info" data-reveal>
+      <div><dt>Wann</dt><dd>${esc(w.when)}</dd></div>
+      <div><dt>Wo</dt><dd>${esc(w.where)}</dd></div>
+      <div><dt>Wer</dt><dd>${esc(w.who)}<br><span style="color:var(--text-muted);font-size:14px">leitet die Gruppe · leads the group</span></dd></div>
+      <div><dt>Was</dt><dd>${w.acts.map(esc).join(" · ")}</dd></div>
+    </dl>
+    <div class="links" style="margin-top:28px" data-reveal>
+      <button class="btn btn-primary" data-reserve="${w.id}"><span>Platz in ${esc(w.name)} reservieren<small>Save a seat in ${esc(w.name)}</small></span><svg class="ic"><use href="#i-arrow"/></svg></button>
+      <button class="btn" data-open-quiz><span>Erst mal das Spiel<small>Swipe-Spiel · 60 Sek.</small></span><svg class="ic"><use href="#i-spark"/></svg></button>
+    </div>
+    <p class="note" style="margin-top:34px" data-reveal>Andere Kieze · Other districts</p>
+    <div class="w-next" data-reveal>${WORLDS.filter(x=>x.id!==w.id).map(x=>`<button data-world="${x.id}">${esc(x.name)}</button>`).join("")}</div>
+    <div class="foot" style="margin:44px 0 0;padding-bottom:44px"><p>Christ Connect Berlin<span>@christ.connect.berlin</span></p>${logo(w.logo)}</div>
+   </div>`;
+  setupRing($("[data-wring]"),250);
+  bindDynamic(el); observe(el);
+  $("[data-home]").addEventListener("click",()=>{location.hash="kieze-home";});
+  $("[data-reserve]").addEventListener("click",()=>{reserve(w.name);});
+}
+const THEME_BG={forest:"#0F2A1D",pine:"#0B6B3A",lime:"#96C84F",mint:"#DDEFD8",chalk:"#F4F2EA"};
+let wipeOrigin=null;
+function wipe(color,x,y,mid){
+  const el=$("#wipe");
+  if(RM){mid();return}
+  el.style.transition="none";el.style.background=color;el.style.opacity=1;el.style.clipPath=`circle(0px at ${x}px ${y}px)`;
+  const R=Math.hypot(Math.max(x,innerWidth-x),Math.max(y,innerHeight-y));
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    el.style.transition=`clip-path 560ms cubic-bezier(.65,0,.35,1)`;el.style.clipPath=`circle(${R}px at ${x}px ${y}px)`;
+    setTimeout(()=>{mid();el.style.transition="opacity 260ms ease";el.style.opacity=0;},580);
+  }));
+}
+function showWorld(id,animate=true){
+  const w=worldBy(id); if(!w) return showHome();
+  const go=()=>{document.body.classList.add("in-world");renderWorld(w);scrollTo(0,0);onScroll();};
+  if(animate&&wipeOrigin){wipe(THEME_BG[w.theme],wipeOrigin.x,wipeOrigin.y,go)} else go();
+  wipeOrigin=null;
+}
+let homeScroll=0;
+function showHome(scrollToKieze){
+  const wasWorld=document.body.classList.contains("in-world");
+  document.body.classList.remove("in-world");$("#world").innerHTML="";
+  if(scrollToKieze&&wasWorld){const el=$("#kieze");scrollTo(0,el.getBoundingClientRect().top+scrollY-8)}
+  onScroll();
+}
+function route(){
+  const h=location.hash.slice(1);
+  if(worldBy(h)) showWorld(h,true);
+  else if(h==="kieze-home") showHome(true);
+  else if(document.body.classList.contains("in-world")) showHome(true);
+}
+addEventListener("hashchange",route);
+function bindDynamic(root){
+  root.querySelectorAll("[data-world]").forEach(b=>b.addEventListener("click",e=>{
+    const r=b.getBoundingClientRect(); wipeOrigin={x:e.clientX||r.left+r.width/2,y:e.clientY||r.top+r.height/2};
+    buzz(); if(location.hash==="#"+b.dataset.world) showWorld(b.dataset.world); else location.hash=b.dataset.world;
+  }));
+  root.querySelectorAll("[data-open-quiz]").forEach(b=>b.addEventListener("click",startQuiz));
+}
+function reserve(district,activity,faith){
+  const go=()=>{
+    if(district) $("select[name=district]").value=district;
+    if(activity!==undefined) $$('input[name=interest]').forEach(c=>{c.checked=c.value===activity||(c.value==="Bibelgruppe"&&faith!=="people")});
+    else { const b=document.querySelector('input[value="Bibelgruppe"]'); if(b) b.checked=true; }
+    goTo("anmelden"); setTimeout(()=>$("input[name=name]").focus({preventScroll:true}),700);
+  };
+  if(document.body.classList.contains("in-world")){history.replaceState(null,"",location.pathname);showHome(false);requestAnimationFrame(go)} else go();
+}
+
+/* ================= OVERLAYS ================= */
+let lastFocus=null;
+function openOv(id){lastFocus=document.activeElement;const o=$("#"+id);o.classList.add("on");o.scrollTop=0;document.body.style.overflow="hidden";setTimeout(()=>{const f=o.querySelector(".stage button,.close");f&&f.focus({preventScroll:true})},50)}
+function closeOv(){$$(".overlay.on").forEach(o=>o.classList.remove("on"));document.body.style.overflow="";lastFocus&&lastFocus.focus&&lastFocus.focus({preventScroll:true})}
+$$("[data-close]").forEach(b=>b.addEventListener("click",closeOv));
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeOv()});
+
+/* ================= QUIZ (game) ================= */
+const STEPS=PAIRS.length+2;
+let step=0,score,faith,district;
+function segs(){ $("#segs").innerHTML=Array.from({length:STEPS},(_,i)=>`<i class="${i<step?"done":""}"></i>`).join("") }
+function startQuiz(){step=0;score={talk:0,create:0,team:0,push:0};faith=null;district=null;segs();renderStep();openOv("quiz")}
+bindDynamic(document);
+
+function renderStep(){
+  segs();
+  const st=$("#stage");
+  if(step<PAIRS.length){
+    $("#q-label").textContent=`Runde 1 · Karte ${step+1}/${PAIRS.length}`;
+    const [a,b]=PAIRS[step];
+    st.innerHTML=`<div class="pop"><div class="q-kicker">Dies oder das? · This or that?</div>
+      <h2 class="hl q-title">${step===0?"Wisch dich <em>durch.</em>":["Was zieht dich <em>an?</em>","Eher so oder <em>so?</em>","Bauchgefühl, <em>los.</em>","Fast <em>da.</em>","Letzte <em>Karte.</em>"][step-1]}</h2></div>
+      <div class="deck"><div class="qcard enter" id="qcard">
+        <button class="half" data-v="${a[2]}"><svg class="ic"><use href="#${a[3]}"/></svg><b>${esc(a[0])}</b><small>${esc(a[1])}</small></button>
+        <button class="half" data-v="${b[2]}"><svg class="ic"><use href="#${b[3]}"/></svg><b>${esc(b[0])}</b><small>${esc(b[1])}</small></button>
+        <span class="or">oder</span></div></div>
+      <div class="swipe-hint"><span>← wischen</span><span>oder tippen</span><span>wischen →</span></div>`;
+    const card=$("#qcard"); requestAnimationFrame(()=>requestAnimationFrame(()=>card.classList.remove("enter")));
+    const halves=card.querySelectorAll(".half");
+    halves.forEach((h,i)=>h.addEventListener("click",()=>{if(!moved) commit(i)}));
+    let x0=null,dx=0,moved=false;
+    card.addEventListener("pointerdown",e=>{x0=e.clientX;dx=0;moved=false;card.classList.add("drag")});
+    card.addEventListener("pointermove",e=>{if(x0===null)return;dx=e.clientX-x0;if(!moved&&Math.abs(dx)>6){moved=true;try{card.setPointerCapture(e.pointerId)}catch(_){}}
+      card.style.transform=`translateX(${dx}px) rotate(${dx/22}deg)`;
+      halves[0].classList.toggle("hot",dx<-40);halves[1].classList.toggle("hot",dx>40)});
+    const end=()=>{if(x0===null)return;card.classList.remove("drag");x0=null;
+      if(Math.abs(dx)>90) commit(dx<0?0:1); else {card.style.transform="";halves.forEach(h=>h.classList.remove("hot"));setTimeout(()=>moved=false,0)}};
+    card.addEventListener("pointerup",end);card.addEventListener("pointercancel",end);
+    card.onkeydown=e=>{if(e.key==="ArrowLeft")commit(0);if(e.key==="ArrowRight")commit(1)};
+    function commit(i){
+      if(card.dataset.done)return;card.dataset.done=1;buzz();
+      halves[i].classList.add("hot");score[halves[i].dataset.v]++;
+      const dir=i===0?-1:1;card.style.transition="transform 340ms cubic-bezier(.2,.7,.2,1),opacity 340ms";
+      card.style.transform=`translateX(${dir*130}%) rotate(${dir*14}deg)`;card.style.opacity=0;
+      step++;setTimeout(renderStep,RM?0:300);
+    }
+  } else if(step===PAIRS.length){
+    $("#q-label").textContent="Runde 2 · Glaube";
+    st.innerHTML=`<div class="pop"><div class="q-kicker">Ehrlich gefragt · Honest question</div>
+      <h2 class="hl q-title">Glaube und Bibel. Wo stehst du <em>gerade?</em></h2><p class="sub" style="margin:0">Faith and the Bible. Where are you right now?</p>
+      <div class="opts">${FAITH_Q.map((o,i)=>`<button class="btn" data-f="${o[2]}" style="animation:pop var(--d2) var(--ease) ${i*60}ms both"><span>${esc(o[0])}<small>${esc(o[1])}</small></span><svg class="ic"><use href="#i-arrow"/></svg></button>`).join("")}</div></div>`;
+    st.querySelectorAll("[data-f]").forEach(b=>b.addEventListener("click",()=>{buzz();faith=b.dataset.f;step++;renderStep()}));
+  } else if(step===PAIRS.length+1){
+    $("#q-label").textContent="Runde 3 · Kiez";
+    st.innerHTML=`<div class="pop"><div class="q-kicker">Letzte Frage · Last one</div>
+      <h2 class="hl q-title">Wo in Berlin bist du <em>meistens?</em></h2><p class="sub" style="margin:0">Where in Berlin are you most of the time?</p>
+      <div class="opts grid2">${WORLDS.map((w,i)=>`<button class="tile t-${w.theme}" data-d="${esc(w.name)}" style="min-height:96px;animation:pop var(--d2) var(--ease) ${i*60}ms both"><span class="tn" style="font-size:24px">${shy(w.name)}</span></button>`).join("")}
+      <button class="tile ghost" data-d="Anderer Bezirk" style="min-height:96px;animation:pop var(--d2) var(--ease) 300ms both"><span class="tn" style="font-size:24px">Woanders</span></button></div></div>`;
+    st.querySelectorAll("[data-d]").forEach(b=>b.addEventListener("click",()=>{buzz();district=b.dataset.d;step++;renderResult()}));
+  }
+}
+function renderResult(){
+  segs(); $("#q-label").textContent="Ergebnis · Result";
+  const order=["talk","create","team","push"], top=order.reduce((a,b)=>score[b]>score[a]?b:a,order[0]);
+  const v=VIBES[top], f=FAITH[faith||"curious"], w=WORLDS.find(x=>x.name===district);
+  $("#stage").innerHTML=`<div class="pop">
+    <div class="q-kicker" style="text-align:center">Screenshot → Story → @christ.connect.berlin</div>
+    <div class="story t-forest" id="story">
+      <svg class="ring" viewBox="0 0 200 200" aria-hidden="true"><circle cx="100" cy="100" r="82" fill="none" stroke="#1C4430" stroke-width="20" data-sring/></svg>
+      <div class="bar" style="position:relative"><b>Mein Samstags-Vibe</b></div>
+      <h2 class="hl" data-lines><span class="line"><span>${esc(v.name)}-</span></span><span class="line" style="--i:1"><span><em class="spark">Vibe.</em></span></span></h2>
+      <p>${esc(v.line)}<br><span style="color:var(--fog)">${esc(v.en)}</span></p>
+      <div class="sfoot"><span>Christ Connect Berlin<br>@christ.connect.berlin</span>${logo("#F4F2EA")}</div>
+    </div>
+    <div class="res-block"><h4>Freunde herausfordern · Challenge your friends</h4><p>Welchen Vibe haben deine Freunde? Schick ihnen das Spiel.</p><p>Which vibe are your friends? Send them the game.</p>
+      <div class="links" style="margin-top:14px">
+        <button class="btn btn-primary" id="share-native"><span>Mit Freunden teilen<small>Share with friends</small></span><svg class="ic"><use href="#i-people"/></svg></button>
+        <a class="btn" id="share-wa" href="#"><span>Per WhatsApp schicken<small>Send via WhatsApp</small></span><svg class="ic"><use href="#i-chat"/></svg></a>
+        <button class="btn" id="share-copy"><span>Link kopieren<small id="share-copy-msg">Copy link</small></span><svg class="ic"><use href="#i-link"/></svg></button>
+      </div></div>
+    <div class="res-block"><h4>Dein Einstieg · Your way in</h4><p><b>${esc(v.act)}</b>. ${esc(v.de)}</p><p>${esc(v.ensub)}</p></div>
+    <div class="res-block"><h4>Glaube · Faith</h4><p>${esc(f.de)}</p><p>${esc(f.en)}</p></div>
+    <div class="res-block"><h4>In deiner Nähe · Near you</h4><p><b>${esc(district||"Berlin")}</b>${w?" · "+esc(w.when):" · Sag uns wo, wir finden was."}</p></div>
+    <div class="links">
+      <button class="btn btn-primary" id="res-go"><span>Platz reservieren<small>Save my seat</small></span><svg class="ic"><use href="#i-arrow"/></svg></button>
+      ${w?`<button class="btn" id="res-world"><span>${esc(w.name)} entdecken<small>Explore your district</small></span><svg class="ic"><use href="#i-loc"/></svg></button>`:""}
+      <button class="btn" id="res-again"><span>Nochmal spielen<small>Play again</small></span><svg class="ic"><use href="#i-spark"/></svg></button>
+    </div>
+    <p class="note" style="margin-top:18px">Nur ein Spiel, kein Persönlichkeitstest. Deine Antworten werden nicht gespeichert. · Just a game, not a personality test. Your answers aren't stored.</p></div>`;
+  $("#quiz").scrollTop=0;
+  setupRing($("[data-sring]"),200); requestAnimationFrame(()=>requestAnimationFrame(()=>$("#story [data-lines]").classList.add("in")));
+  const url=(PAGE_URL||location.href.split("#")[0]);
+  const msg=`Ich hab den ${v.name}-Vibe. Welcher Samstags-Vibe bist du? 60 Sekunden: ${url}`;
+  $("#share-wa").href="https://wa.me/?text="+encodeURIComponent(msg);
+  const nb=$("#share-native");
+  if(!navigator.share) nb.style.display="none";
+  nb.addEventListener("click",async()=>{try{await navigator.share({title:"Christ Connect Berlin",text:msg.replace(url,"").trim(),url})}catch(e){}});
+  $("#share-copy").addEventListener("click",async()=>{try{await navigator.clipboard.writeText(msg);$("#share-copy-msg").textContent="Kopiert · Copied";buzz()}catch(e){$("#share-copy-msg").textContent=msg}});
+  $("#res-again").addEventListener("click",()=>{step=0;score={talk:0,create:0,team:0,push:0};renderStep()});
+  $("#res-go").addEventListener("click",()=>{closeOv();reserve(w?w.name:"Anderer Bezirk",v.act,faith)});
+  if(w) $("#res-world").addEventListener("click",e=>{closeOv();wipeOrigin={x:e.clientX||innerWidth/2,y:e.clientY||innerHeight/2};location.hash=w.id});
+}
+
+/* ================= SIGN-UP ================= */
+$("#signup").addEventListener("submit",async e=>{
+  e.preventDefault();
+  const fd=new FormData(e.target);
+  const entry={time:new Date().toISOString(),name:(fd.get("name")||"").trim(),contact:(fd.get("contact")||"").trim(),district:fd.get("district")||"",interests:fd.getAll("interest").join(", "),source:"Linkpage"};
+  const miss=[];
+  if(!entry.name)miss.push("Vorname"); if(!entry.contact)miss.push("Kontakt"); if(!entry.district)miss.push("Bezirk");
+  if(!fd.get("age16"))miss.push("16+"); if(!fd.get("consent"))miss.push("Einverständnis");
+  if(miss.length){$("#err").textContent="Bitte noch ausfüllen · Please complete: "+miss.join(", ");const b=e.target.querySelector("[type=submit]");b.classList.remove("shake");void b.offsetWidth;b.classList.add("shake");return;}
+  $("#err").textContent="";
+  if(SUBMIT_URL){try{await fetch(SUBMIT_URL,{method:"POST",mode:"no-cors",body:JSON.stringify(entry)});}catch(err){}}
+  const list=store.get("cc_demo_inbox")||[]; list.push(entry); store.set("cc_demo_inbox",list);
+  $("#thanks-txt").textContent=`Danke, ${entry.name}. Jemand aus dem Team ${entry.district==="Anderer Bezirk"?"":"in "+entry.district+" "}meldet sich in den nächsten Tagen bei dir (${entry.contact}). Thanks, someone from the team will reach out soon.`;
+  e.target.reset(); buzz(); openOv("thanks");
+});
+
+/* ================= TEAM DEMO ================= */
+function renderTeam(){
+  const list=store.get("cc_demo_inbox")||[];
+  $("#team-list").innerHTML=list.length?`<table><thead><tr><th>Datum</th><th>Name</th><th>Kontakt</th><th>Bezirk</th><th>Interessen</th></tr></thead><tbody>${list.slice().reverse().map(r=>`<tr><td>${esc(r.time.slice(0,10))}</td><td>${esc(r.name)}</td><td>${esc(r.contact)}</td><td>${esc(r.district)}</td><td>${esc(r.interests)}</td></tr>`).join("")}</tbody></table>`:`<p style="margin-top:22px">Noch keine Anmeldungen. Füll das Formular einmal aus, um den Ablauf zu sehen.</p>`;
+}
+$$("[data-open-team]").forEach(b=>b.addEventListener("click",()=>{renderTeam();openOv("team")}));
+$("#copy-csv").addEventListener("click",async()=>{
+  const list=store.get("cc_demo_inbox")||[];
+  const csv=["Datum,Name,Kontakt,Bezirk,Interessen,Quelle"].concat(list.map(r=>[r.time,r.name,r.contact,r.district,r.interests,r.source].map(x=>'"'+String(x).replace(/"/g,'""')+'"').join(","))).join("\n");
+  try{await navigator.clipboard.writeText(csv);$("#copy-msg").textContent="Kopiert · Copied";}catch(e){$("#copy-msg").textContent="Kopieren nicht möglich";}
+});
+
+/* initial route */
+if(worldBy(location.hash.slice(1))) showWorld(location.hash.slice(1),false);
+onScroll();
+</script>
+</body>
+</html>
